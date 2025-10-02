@@ -1,0 +1,110 @@
+trigger: none
+
+parameters:
+  - name: rootModFolder
+    type: string
+    values:
+     - hub
+     - adds
+     - gateway
+     - route_server
+    displayName: Root Module Folder
+
+  - name: runApply
+    type: boolean
+    default: false
+    displayName: Run Apply Stage
+
+  - name: runDestroy
+    type: boolean
+    default: false
+    displayName: Run Destroy Stage
+
+variables:
+  backendStorageAccountRG: rg-tfstate-dmathias-stg 
+  backendStorageAccountName: stgtfstatedmathias
+  containerName: luminair-tfstate
+  environment: prd
+  serviceConnectionName: spn-dvproserv-shared-sub-dmathias
+
+stages:
+- stage: Terraform_Deployment
+  displayName: Terraform Deployment
+  jobs:
+  - job: Build
+    steps:
+    - task: AzureCLI@1
+      displayName: Update Terraform 
+      inputs:
+        azureSubscription: ${{ variables.serviceConnectionName }}
+        scriptLocation: inlineScript
+        inlineScript: |
+          wget -O - https://apt.releases.hashicorp.com/gpg | sudo gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg
+          echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/hashicorp.list
+          sudo apt update && sudo apt install terraform
+        workingDirectory: terraform/${{ parameters.rootModFolder }}
+        addSpnToEnvironment: true
+
+    - task: AzureCLI@1
+      displayName: Terraform init
+      inputs:
+        azureSubscription: ${{ variables.serviceConnectionName }}
+        scriptLocation: inlineScript
+        inlineScript: |
+          set -eux  # fail on error
+          subscriptionId=$(az account show --query id -o tsv)
+          echo "##vso[task.setvariable variable=ARM_CLIENT_ID]$servicePrincipalId"
+          echo "##vso[task.setvariable variable=ARM_CLIENT_SECRET;issecret=true]$servicePrincipalKey"
+          echo "##vso[task.setvariable variable=ARM_SUBSCRIPTION_ID]$subscriptionId"
+          echo "##vso[task.setvariable variable=ARM_TENANT_ID]$tenantId"
+          terraform init \
+            -backend-config=resource_group_name=${{ variables.backendStorageAccountRG }} \
+            -backend-config=storage_account_name=${{ variables.backendStorageAccountName }} \
+            -backend-config=container_name=${{ variables.containerName }} \
+            -backend-config=key=${{ variables.environment }}-${{ parameters.rootModFolder }}.tfstate \
+            -backend-config=subscription_id=$subscriptionId \
+            -backend-config=tenant_id=$tenantId \
+            -backend-config=client_id=$servicePrincipalId \
+            -backend-config=client_secret="$servicePrincipalKey"
+        workingDirectory: terraform/${{ parameters.rootModFolder }}
+        addSpnToEnvironment: true
+
+    - task: Bash@3
+      displayName: Terraform plan
+      condition: ${{ eq(parameters.runDestroy, false) }}
+      inputs:
+        targetType: inline
+        script: |
+          export ARM_CLIENT_ID=$(ARM_CLIENT_ID) 
+          export ARM_CLIENT_SECRET=$(ARM_CLIENT_SECRET)
+          export ARM_SUBSCRIPTION_ID=$(ARM_SUBSCRIPTION_ID)
+          export ARM_TENANT_ID=$(ARM_TENANT_ID)
+          terraform plan -out=planFile
+        workingDirectory: terraform/${{ parameters.rootModFolder }}
+
+    - task: Bash@3
+      displayName: Terraform apply
+      condition: ${{ eq(parameters.runApply, true) }}
+      inputs:
+        targetType: inline
+        script: |
+          export ARM_CLIENT_ID=$(ARM_CLIENT_ID)
+          export ARM_CLIENT_SECRET=$(ARM_CLIENT_SECRET)
+          export ARM_SUBSCRIPTION_ID=$(ARM_SUBSCRIPTION_ID)
+          export ARM_TENANT_ID=$(ARM_TENANT_ID)
+          terraform apply planFile
+        workingDirectory: terraform/${{ parameters.rootModFolder }}
+
+    - task: Bash@3
+      displayName: Terraform destroy
+      condition: ${{ eq(parameters.runDestroy, true) }}
+      inputs:
+        targetType: inline
+        script: |
+          export ARM_CLIENT_ID=$(ARM_CLIENT_ID)
+          export ARM_CLIENT_SECRET=$(ARM_CLIENT_SECRET)
+          export ARM_SUBSCRIPTION_ID=$(ARM_SUBSCRIPTION_ID)
+          export ARM_TENANT_ID=$(ARM_TENANT_ID)
+          terraform destroy -auto-approve
+        workingDirectory: terraform/${{ parameters.rootModFolder }}
+
