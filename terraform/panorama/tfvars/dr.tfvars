@@ -1,10 +1,10 @@
 ######################################################################################
 # Global variables
 ######################################################################################
-location = "eastus"
+location = "westus"
 log_workspace_sub_id = "1cbd70a5-1547-4183-846f-12003f04578c"
-log_workspace_rg = "hub-p-logs-rg01"
-log_workspace_name = "hub-p-law01"
+log_workspace_rg     = "hub-p-logs-rg01"
+log_workspace_name   = "hub-p-law01"
 
 ##################################################################################
 # Connectivity network variables

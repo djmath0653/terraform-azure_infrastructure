@@ -17,7 +17,7 @@ module "pano_public_ip_address" {
   name                = "${var.pano_vm_name}-0${count.index + 1}-pip"
   resource_group_name = module.pano_resource_group.name
   location            = module.pano_resource_group.location
-  zones               = [count.index + 1]
+  zones                = var.location == "westus" ? null : [count.index + 1]
   diagnostic_settings = {
     diag = {
       workspace_resource_id = local.workspace_resource_id
@@ -32,7 +32,7 @@ module "firewall_pair" {
   name                = "${var.pano_vm_name}-0${count.index + 1}"
   resource_group_name = module.pano_resource_group.name
   location            = module.pano_resource_group.location
-  zone                = count.index + 1
+  zone                = var.location == "westus" ? null : count.index + 1
   sku_size            = "Standard_DS3_v2"
   os_type             = "Linux"
   source_image_reference = ({

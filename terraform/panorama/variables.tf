@@ -1,7 +1,7 @@
 ######################################################################################
 # Global variables
 ######################################################################################
-variable "subscription_id" {
+variable "log_workspace_sub_id" {
   type    = string
   default = "1cbd70a5-1547-4183-846f-12003f04578c"
 }
@@ -36,7 +36,7 @@ variable "rg_name" {
 
 variable "vnet_name" {
   type    = string
-  default = "pano-p-vnet01"
+  default = "hb-p-PANO-vnet-01"
 }
 
 variable "address_space" {
@@ -72,7 +72,7 @@ variable "peers" {
 ##################################################################################
 variable "pano_rg_name" {
   type    = string
-  default = "P-Pano-RG01"
+  default = "P-PANO-RG01"
 }
 
 variable "pano_vm_name" {

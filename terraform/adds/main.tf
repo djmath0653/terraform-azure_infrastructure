@@ -42,7 +42,7 @@ module "test_machine" {
   name                = "${var.vm_name}-0${count.index + 1}"
   resource_group_name = module.vm_resource_group.name
   location            = module.vm_resource_group.location
-  zone                = count.index + 1
+  zone                = var.location == "westus" ? null : count.index + 1
   os_type             = "Linux"
   source_image_reference = {
     publisher = "Canonical"

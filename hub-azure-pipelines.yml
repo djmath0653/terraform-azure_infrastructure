@@ -4,11 +4,17 @@ parameters:
   - name: rootModFolder
     type: string
     values:
+     - panorama
      - hub
      - adds
-     - gateway
-     - route_server
     displayName: Root Module Folder
+
+  - name: environment
+    type: string
+    values:
+     - dr
+     - prd
+    displayName: Environment 
 
   - name: runApply
     type: boolean
@@ -24,7 +30,7 @@ variables:
   backendStorageAccountRG: rg-tfstate-dmathias-stg 
   backendStorageAccountName: stgtfstatedmathias
   containerName: luminair-tfstate
-  environment: prd
+  environment: dr
   serviceConnectionName: spn-dvproserv-shared-sub-dmathias
 
 stages:
@@ -61,7 +67,7 @@ stages:
             -backend-config=resource_group_name=${{ variables.backendStorageAccountRG }} \
             -backend-config=storage_account_name=${{ variables.backendStorageAccountName }} \
             -backend-config=container_name=${{ variables.containerName }} \
-            -backend-config=key=${{ variables.environment }}-${{ parameters.rootModFolder }}.tfstate \
+            -backend-config=key=${{ parameters.environment }}-${{ parameters.rootModFolder }}.tfstate \
             -backend-config=subscription_id=$subscriptionId \
             -backend-config=tenant_id=$tenantId \
             -backend-config=client_id=$servicePrincipalId \
@@ -79,7 +85,7 @@ stages:
           export ARM_CLIENT_SECRET=$(ARM_CLIENT_SECRET)
           export ARM_SUBSCRIPTION_ID=$(ARM_SUBSCRIPTION_ID)
           export ARM_TENANT_ID=$(ARM_TENANT_ID)
-          terraform plan -out=planFile
+          terraform plan -out=planFile -var-file="./tfvars/${{ parameters.environment }}.tfvars" 
         workingDirectory: terraform/${{ parameters.rootModFolder }}
 
     - task: Bash@3
@@ -92,7 +98,7 @@ stages:
           export ARM_CLIENT_SECRET=$(ARM_CLIENT_SECRET)
           export ARM_SUBSCRIPTION_ID=$(ARM_SUBSCRIPTION_ID)
           export ARM_TENANT_ID=$(ARM_TENANT_ID)
-          terraform apply planFile
+          terraform apply planFile 
         workingDirectory: terraform/${{ parameters.rootModFolder }}
 
     - task: Bash@3
@@ -105,6 +111,6 @@ stages:
           export ARM_CLIENT_SECRET=$(ARM_CLIENT_SECRET)
           export ARM_SUBSCRIPTION_ID=$(ARM_SUBSCRIPTION_ID)
           export ARM_TENANT_ID=$(ARM_TENANT_ID)
-          terraform destroy -auto-approve
+          terraform destroy -auto-approve 
         workingDirectory: terraform/${{ parameters.rootModFolder }}
 
