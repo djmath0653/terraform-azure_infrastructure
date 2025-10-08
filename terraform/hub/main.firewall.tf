@@ -62,7 +62,7 @@ module "firewall_pair" {
         ip_configuration_1 = {
           name                          = "ipconfig1-${module.virtual_network.subnet["palo-mgtmt-Subnet-01"].name}"
           private_ip_subnet_resource_id = module.virtual_network.subnet["palo-mgtmt-Subnet-01"].id
-          private_ip_address            = "172.20.0.13${count.index + 2}"
+          private_ip_address            = var.fw_mgmt_nic[count.index]
           private_ip_address_allocation = "Static"
         }
       }
@@ -81,7 +81,7 @@ module "firewall_pair" {
         ip_configuration_1 = {
           name                          = "ipconfig1-${module.virtual_network.subnet["palo-untrust-Subnet-01"].name}"
           private_ip_subnet_resource_id = module.virtual_network.subnet["palo-untrust-Subnet-01"].id
-          private_ip_address            = "172.20.0.14${count.index + 8}"
+          private_ip_address            = var.fw_untrust_nic[count.index]
           private_ip_address_allocation = "Static"
           public_ip_address_resource_id = module.fw_public_ip_address[count.index].resource_id
         }
@@ -101,7 +101,7 @@ module "firewall_pair" {
         ip_configuration_1 = {
           name                          = "ipconfig1-${module.virtual_network.subnet["palo-trust-Subnet-01"].name}"
           private_ip_subnet_resource_id = module.virtual_network.subnet["palo-trust-Subnet-01"].id
-          private_ip_address            = "172.20.0.16${count.index + 4}"
+          private_ip_address            = var.fw_trust_nic[count.index]
           private_ip_address_allocation = "Static"
         }
       }
@@ -119,7 +119,7 @@ module "firewall_pair" {
         ip_configuration_1 = {
           name                          = "ipconfig1-${module.virtual_network.subnet["palo-ha-Subnet-01"].name}"
           private_ip_subnet_resource_id = module.virtual_network.subnet["palo-ha-Subnet-01"].id
-          private_ip_address            = "172.20.0.18${count.index}"
+          private_ip_address            = var.fw_ha_nic[count.index]
           private_ip_address_allocation = "Static"
         }
       }

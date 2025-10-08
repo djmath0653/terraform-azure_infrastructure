@@ -115,6 +115,27 @@ variable "password" {
   default = "PaloAlto123!"
 }
 
+variable "fw_mgmt_nic" {
+  type    = list(string)
+  default = ["172.20.0.132","172.20.0.133"]
+}
+
+variable "fw_untrust_nic" {
+  type    = list(string)
+  default = ["172.20.0.148","172.20.0.149"]
+}
+
+variable "fw_trust_nic" {
+  type    = list(string)
+  default = ["172.20.0.164","172.20.0.165"]
+}
+
+variable "fw_ha_nic" {
+  type    = list(string)
+  default = ["172.20.0.180","172.20.0.181"]
+}
+
+
 ##################################################################################
 # External Load Balancer variables
 ##################################################################################
@@ -136,6 +157,49 @@ variable "int_lb_name" {
 variable "frontend_private_ip_address" {
   type    = string
   default = "172.20.0.174"
+}
+
+##################################################################################
+# Virtual Network Gateway variables
+##################################################################################
+variable "vpn_pip_name" {
+  type    = string
+  default = "gwy-vpn-p-pip"
+}
+
+variable "vpn_vng_name" {
+  type    = string
+  default = "gwy-vpn-p-vng"
+}
+
+variable "vpn_vng_sku" {
+  type    = string
+  default = "VpnGw1"
+}
+
+variable "vpn_vng_type" {
+  type    = string
+  default = "Vpn"
+}
+
+variable "vpn_lng_name" {
+  type    = string
+  default = "gwy-vpn-p-lng"
+}
+
+variable "vpn_lng_ip_addess" {
+  type    = string
+  default = "73.50.100.28"
+}
+
+variable "vpn_lng_addess_space" {
+  type    = list(string)
+  default = ["192.168.0.0/16"]
+}
+
+variable "vpn_connection_name" {
+  type    = string
+  default = "gwy-vpn-p-lng-connection"
 }
 
 ##################################################################################

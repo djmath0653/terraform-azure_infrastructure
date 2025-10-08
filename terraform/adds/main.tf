@@ -20,11 +20,6 @@ module "virtual_network" {
   route_tables         = var.route_tables
   peers                = var.peers
   tags                 = var.tags
-  diagnostic_settings = {
-    diag = {
-      workspace_resource_id = local.workspace_resource_id
-    }
-  }
 }
 
 module "vm_resource_group" {

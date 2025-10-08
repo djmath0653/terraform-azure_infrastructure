@@ -12,7 +12,7 @@ module "pano_resource_group" {
 # This is the module call
 module "pano_public_ip_address" {
   source = "../../modules/arm_public_ip_address"
-  count  = 2
+  count  = 1
 
   name                = "${var.pano_vm_name}-0${count.index + 1}-pip"
   resource_group_name = module.pano_resource_group.name
